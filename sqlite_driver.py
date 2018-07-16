@@ -11,21 +11,27 @@
 import sqlite3
 
 class Sqlite_db():
-    def __init__(self):
+    def __init__(self,db_name):
         #数据库名字
-        self.db_name ='test.sqlite'
+        self.db_name =db_name
 
         self.conn=sqlite3.connect(self.db_name)
         self.cur = self.conn.cursor()
 
         #mysql列名
         #self.mysql_bar='url,title,time_line,tag,author,head,body'
-        self.mysql_col_num=8
+        self.mysql_col_num=6
 
         mysql_col = []
         for i in range(0,self.mysql_col_num):
             mysql_col.append('?')
         self.mysql_col=','.join(mysql_col)
+
+    #返回一个包含所有数据库名称的列表
+    def list_databases(self):
+        self.cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        dbs = self.cur.fetchall()
+        return dbs
 
     #返回列数
     def get_col_num(self,table):
@@ -42,14 +48,6 @@ class Sqlite_db():
     #执行insert语句时，返回新插入行的ID
     def insert_id(self):
         return self.cur.lastrowid()
-
-    #当执行语句时，返回受影响的行数
-    def affected_rows(self):
-        pass
-
-    #上次一查询语句的地方
-    def last_query(self):
-        pass
 
     #获取数据表总行数
     def count_all(self,table):
@@ -79,7 +77,12 @@ class Sqlite_db():
 
 
     def add(self,table,*data):
-        sql = 'insert into %s values(NUll,%s)' % (table,self.mysql_col)
+        mysql_col = []
+        for i in range(0, self.get_col_num(table)-1):
+            mysql_col.append('?')
+        mysql_col = ','.join(mysql_col)
+
+        sql = 'insert into %s values(NUll,%s)' % (table,mysql_col)
         #print sql
         self.cur.execute(sql, data)
         self.conn.commit()
@@ -101,9 +104,17 @@ class Sqlite_db():
         result=self.cur.fetchone()
         return result[0]
 
-if __name__ == '__main__':
 
-    sqlite=Sqlite_db()
-    dic={'id': 1, 'a': 'siu'}
-    print sqlite.get_where('test',**dic)
+
+if __name__ == '__main__':
+    sql=Sqlite_db('test.sqlite')
+    id=None
+    tag=u'工具'
+    href='https://www.baidu.com'
+    title=u'欧服啊'
+    date=1827381273
+    summary=u'爱哦父爱度发哦'
+    live=1
+    #data = (tag, href, title, summary, date,live)
+    sql.add('freebuf_info',tag,href,title,summary,date,live)
 
