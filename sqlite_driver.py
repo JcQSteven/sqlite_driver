@@ -15,7 +15,7 @@ class Sqlite_db():
         #数据库名字
         self.db_name =db_name
 
-        self.conn=sqlite3.connect(self.db_name)
+        self.conn=sqlite3.connect(self.db_name,check_same_thread=False)
         self.cur = self.conn.cursor()
 
         #mysql列名
@@ -96,7 +96,13 @@ class Sqlite_db():
         sql='select * from %s'%table
         self.cur.execute(sql)
         value=self.cur.fetchall()
-        print value
+        return value
+
+    def get_all_limit(self,table,num):
+        sql = 'select * from %s limit %d' % (table,num)
+        self.cur.execute(sql)
+        value = self.cur.fetchall()
+        return value
 
     def get_last_one(self,table,col_name):
         sql='select %s from %s order by ID DESC limit 1'%(col_name,table)
@@ -108,13 +114,5 @@ class Sqlite_db():
 
 if __name__ == '__main__':
     sql=Sqlite_db('test.sqlite')
-    id=None
-    tag=u'工具'
-    href='https://www.baidu.com'
-    title=u'欧服啊'
-    date=1827381273
-    summary=u'爱哦父爱度发哦'
-    live=1
-    #data = (tag, href, title, summary, date,live)
-    sql.add('freebuf_info',tag,href,title,summary,date,live)
+    sql.get_all('freebuf_info')
 
