@@ -54,10 +54,6 @@ class Sqlite_db():
         self.cur.execute('select * from %s'%table)
         return len(self.cur.fetchall())
 
-    #执行select语句，获取表的所有数据
-    def get(self,table):
-        self.cur.execute('select * from %s' % table)
-        return self.cur.fetchall()
 
     def get_where(self,table,**data):
         #
@@ -66,13 +62,14 @@ class Sqlite_db():
         items= data.items()
         list=[]
         for a,b in items:
-            list.append('%s=%s'%(a,b))
+
+            list.append('%s="%s"'%(a,b))
         where= ' and '.join(list)
 
-        sql='select * from %s where %s'%(table,where)
-        print sql
-
-        self.cur.execute('select * from %s where ?'%table,(where,))
+        sql="select * from '%s' where %s"%(table,where)
+        self.cur.execute(sql)
+        result= self.cur.fetchall()
+        return result
 
 
 
@@ -113,6 +110,6 @@ class Sqlite_db():
 
 
 if __name__ == '__main__':
-    sql=Sqlite_db('test.sqlite')
-    sql.get_all('freebuf_info')
+    sql=Sqlite_db('movie.sqlite')
+    print sql.get_where('6v_movie',href='http://www.hao6v.com/dy/2018-07-16/LangRenShenTan.html')
 
